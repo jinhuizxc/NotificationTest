@@ -18,6 +18,7 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mylhyl.circledialog.CircleDialog;
 import com.ycbjie.notificationlib.NotificationUtils;
 
 import butterknife.BindView;
@@ -71,6 +72,37 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         init();
+
+        checkOpenNotification();
+
+    }
+
+    private void checkOpenNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (!NotificationUtils.isNotificationEnabled(this)) {
+                new CircleDialog.Builder()
+                        .setTitle("您还未开启系统通知，可能会影响消息的接收，要去开启吗？")
+                        .setTitleColor(getResources().getColor(R.color.black))
+                        .setWidth(0.8f)
+
+                        .setCancelable(false)
+                        .setPositive("确定", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                // 跳转权限设置
+                                NotificationUtils.gotoSet(MainActivity.this);
+                            }
+                        })
+                        .setNegative("取消", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+
+                            }
+                        })
+                        .show(getSupportFragmentManager());
+            } else {
+            }
+        }
     }
 
 
