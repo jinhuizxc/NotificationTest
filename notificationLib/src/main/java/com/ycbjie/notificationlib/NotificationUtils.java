@@ -42,6 +42,21 @@ public class NotificationUtils extends ContextWrapper {
     private NotificationManager mManager;
     private int[] flags;
 
+
+    private static NotificationUtils instance;
+
+    public static NotificationUtils getInstance(Context context) {
+        if (instance == null) {
+            synchronized (NotificationUtils.class) {
+                if (instance == null) {
+                    instance = new NotificationUtils(context);
+                }
+            }
+        }
+        return instance;
+    }
+
+
     public NotificationUtils(Context context) {
         super(context);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

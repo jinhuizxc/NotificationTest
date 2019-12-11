@@ -13,13 +13,17 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.blankj.utilcode.util.ToastUtils;
 import com.mylhyl.circledialog.CircleDialog;
 import com.ycbjie.notificationlib.NotificationUtils;
+
+import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -31,6 +35,7 @@ import butterknife.OnClick;
  */
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity";
     @BindView(R.id.tv_1)
     TextView tv1;
     @BindView(R.id.tv_2)
@@ -65,15 +70,27 @@ public class MainActivity extends AppCompatActivity {
     private NotificationManager mNotificationManager;
 
 
+    public static final int NOTIFICATION_REQUEST_CODE = 12;
+    public static final String NOTIFICATION_ACTION = "action";
+
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        ToastUtils.showShort("onNewIntent方法执行");
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        init();
-
         checkOpenNotification();
+
+        // 创建一个NotificationManager的引用
+        mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
 
     }
 
@@ -106,17 +123,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void init() {
-        initNotificationManager();
-    }
-
-
-
-    private void initNotificationManager() {
-        // 创建一个NotificationManager的引用
-        mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-    }
-
 
     @OnClick({R.id.tv_1, R.id.tv_2, R.id.tv_3, R.id.tv_4, R.id.tv_5,
             R.id.tv_6, R.id.tv_7, R.id.tv_8, R.id.tv_9, R.id.tv_10, R.id.tv_11,
@@ -127,7 +133,6 @@ public class MainActivity extends AppCompatActivity {
                 cancelAllNotification();
                 break;
             case R.id.tv_2:
-                Toast.makeText(this, "tv_2", Toast.LENGTH_SHORT).show();
                 sendNotification1();
                 break;
             case R.id.tv_3:
@@ -175,8 +180,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void cancelAllNotification() {
-        NotificationUtils notificationUtils = new NotificationUtils(this);
-        notificationUtils.clearNotification();
+//        NotificationUtils notificationUtils = new NotificationUtils(this);
+//        notificationUtils.clearNotification();
+        NotificationUtils.getInstance(this).clearNotification();
     }
 
 
@@ -391,10 +397,54 @@ public class MainActivity extends AppCompatActivity {
         NotificationUtils notificationUtils = new NotificationUtils(this);
         notificationUtils
                 .setDefaults(Notification.DEFAULT_ALL)
-
                 .setFlags(Notification.FLAG_ONLY_ALERT_ONCE)
                 .sendNotification(14, "显示进度条14", "显示进度条内容，自定定义", R.mipmap.ic_launcher);
     }
+
+    private void sendNotification15() {
+
+        /**
+         * PendingIntent.getActivity(),getBroadcast(),getService()等方法
+         */
+        Intent intent = new Intent(App.getApp(), MainActivity.class);
+        intent.putExtra(MainActivity.NOTIFICATION_ACTION, "commission_action");
+        PendingIntent pendingIntent = PendingIntent.getActivity(App.getApp(),
+                MainActivity.NOTIFICATION_REQUEST_CODE, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT);
+
+        String title = "新消息来了";
+        String content = "周末到了，不用上班了";
+
+        String notifyId = randomUUID();
+        Log.e(TAG, "sendNotification15 ->notifyId: " + notifyId);
+
+        NotificationUtils.getInstance(App.getApp())
+                .setContentIntent(pendingIntent)   //设置可点击跳转
+                .setOngoing(true)
+                .sendNotification(1, title, content,
+                        R.mipmap.icon);
+
+    }
+
+
+
+    /**
+     * 生成随机数<br>
+     * GUID： 即Globally Unique Identifier（全球唯一标识符） 也称作 UUID(Universally Unique
+     * IDentifier) 。
+     *
+     * 所以GUID就是UUID。
+     *
+     * GUID是一个128位长的数字，一般用16进制表示。算法的核心思想是结合机器的网卡、当地时间、一个随即数来生成GUID。
+     *
+     * 从理论上讲，如果一台机器每秒产生10000000个GUID，则可以保证（概率意义上）3240年不重复。
+     *
+     * @return
+     */
+    public static String randomUUID() {
+        return UUID.randomUUID().toString().replace("-", "");
+    }
+
 
 
     /**
@@ -427,9 +477,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void sendNotification15() {
-        NotificationUtils notificationUtils = new NotificationUtils(this);
-        notificationUtils.sendNotification(15, "新消息来了", "周末到了，不用上班了", R.mipmap.ic_launcher);
-    }
+
 
 }

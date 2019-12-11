@@ -36,4 +36,8 @@ dependencies {
     implementation 'com.mylhyl:circleDialog:3.0.8'
     implementation 'com.android.support:cardview-v7:28.0.0'
 
+    //util
+    api "com.blankj:utilcode:$rootProject.ext.utilcodeVersion"
+
+
 }
